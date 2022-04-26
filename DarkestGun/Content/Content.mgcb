@@ -13,6 +13,9 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Levels/a.txt
+/copy:Levels/a.txt
+
 #begin mall.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -25,7 +28,7 @@
 /processorParam:TextureFormat=Color
 /build:mall.png
 
-#begin oldIdle.png
+#begin PlayerIdle.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -35,9 +38,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:oldIdle.png
+/build:PlayerIdle.png
 
-#begin oldWalk.png
+#begin PlayerWalk.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -47,7 +50,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:oldWalk.png
+/build:PlayerWalk.png
 
 #begin rumpi.spritefont
 /importer:FontDescriptionImporter
@@ -55,6 +58,30 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:rumpi.spritefont
+
+#begin TIles/Impassable.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TIles/Impassable.png
+
+#begin TIles/Passable.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TIles/Passable.png
 
 #begin toilet.png
 /importer:TextureImporter

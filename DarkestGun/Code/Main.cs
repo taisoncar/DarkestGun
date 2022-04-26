@@ -1,7 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
+﻿using System;
+using System.IO;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace DarkestGun
 {
@@ -11,7 +13,7 @@ namespace DarkestGun
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private Camera camera;
-        private Player player;
+        private Level level;
 
         //Contents
         private Texture2D mall;
@@ -47,7 +49,7 @@ namespace DarkestGun
         {
             //Load other classes
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            player = new Player(spriteBatch, Content);
+            LoadNextLevel();
             camera = new Camera();
             
             //Load sprites
@@ -58,14 +60,28 @@ namespace DarkestGun
             font = Content.Load<SpriteFont>("rumpi");
         }
 
+        private void LoadNextLevel()
+        {
+
+            // Unloads the content for the current level before loading the next one.
+            if (level != null)
+                level.Dispose();
+
+            // Load the level.
+            string levelPath = "Content/Levels/a.txt";
+
+            using (Stream fileStream = TitleContainer.OpenStream(levelPath))
+                level = new Level(Content, fileStream);
+        }
+
         protected override void Update(GameTime gameTime)
         {
             //Framerate calculation
             FrameRate = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             //Update calls
-            player.Update(gameTime);
-            camera.Update(player);
+            level.Player.Update(gameTime);
+            camera.Update(level.Player);
 
             base.Update(gameTime);
         }
@@ -83,22 +99,21 @@ namespace DarkestGun
                               camera.Transform);
 
             //Toilet background
-            spriteBatch.Draw(toilet, new Rectangle(0, 0, 1600, 900), Color.White);
+            //spriteBatch.Draw(toilet, new Rectangle(0, 0, 1600, 900), Color.White);
 
             //FPS counter
-            spriteBatch.DrawString(font, FrameRate.ToString("0"), new Vector2(30,30), Color.Black);
+            //spriteBatch.DrawString(font, FrameRate.ToString("0"), new Vector2(30,30), Color.Black);
 
             //Draw player position as a string
-            spriteBatch.DrawString(font,
-                                    "(" + player.PlayerPosition.X.ToString("0") + "," + player.PlayerPosition.Y.ToString("0") + ")",
-                                    new Vector2(0, -50),
-                                    Color.Black);
-
+            /*spriteBatch.DrawString(font,
+                                    "(" + level.Player.PlayerPosition.X.ToString("0") + "," + level.Player.PlayerPosition.Y.ToString("0") + ")",
+                                   new Vector2(0, -50),
+                                    Color.Black);*/
             //Player animation
-            player.Draw(gameTime);
+            level.Draw(gameTime, spriteBatch);
 
             //Toilet
-            spriteBatch.Draw(toilet, new Vector2(450, 240), Color.White);
+            //spriteBatch.Draw(toilet, new Vector2(450, 240), Color.White);
 
             spriteBatch.End();
 

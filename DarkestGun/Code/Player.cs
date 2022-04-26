@@ -11,10 +11,9 @@ namespace DarkestGun
 		//Including other classes
 		private KeyboardState currentKBState;
 		private KeyboardState previousKBState;
-		private SpriteBatch spriteBatch;
 
 		//Player Variables
-		public Vector2 PlayerPosition = new Vector2(0, 0);
+		public Vector2 PlayerPosition;
 		public int PlayerSpeed = 100;					//Speed in pixels/s
 		public float Interval;						//Animation frames Interval in seconds
 		public bool FacingRight = true;
@@ -23,9 +22,8 @@ namespace DarkestGun
 		Vector2 PlayerVelocity = new Vector2();
 
 		//Contents
-		private Texture2D[] PlayerSprite = new Texture2D[100];
-		private int[] PlayerSpriteColumnCount = new int[100];
-		private SpriteFont font;
+		private Texture2D[] PlayerSprite = new Texture2D[2];
+		private int[] PlayerSpriteColumnCount = new int[2];
 
 		//Frame timing variables
 		private int currentFrame = 0;
@@ -39,19 +37,16 @@ namespace DarkestGun
 		}
 		public PlayerStates PlayerState;
 
-		public Player(SpriteBatch spriteBatch, ContentManager Content) 
+		public Player(Level level, Vector2 position) 
         {
-			this.spriteBatch = spriteBatch;
+			PlayerPosition = position;
 			
 			//Load player animation sprites
-			PlayerSprite[(int)PlayerStates.idle] = Content.Load<Texture2D>("oldIdle");
-			PlayerSpriteColumnCount[(int)PlayerStates.idle] = 9;
+			PlayerSprite[(int)PlayerStates.idle] = level.Content.Load<Texture2D>("PlayerIdle");
+			PlayerSpriteColumnCount[(int)PlayerStates.idle] = 11;
 
-			PlayerSprite[(int)PlayerStates.walk] = Content.Load<Texture2D>("oldWalk");
-			PlayerSpriteColumnCount[(int)PlayerStates.walk] = 8;
-
-			//Load fonts
-			font = Content.Load<SpriteFont>("rumpi");
+			PlayerSprite[(int)PlayerStates.walk] = level.Content.Load<Texture2D>("PlayerWalk");
+			PlayerSpriteColumnCount[(int)PlayerStates.walk] = 10;
 		}
 
 		public void Update(GameTime gameTime)
@@ -73,12 +68,12 @@ namespace DarkestGun
 			if (currentKBState.IsKeyDown(Keys.Space))
 			{
 				PlayerSpeed = 200;
-				Interval = 0.1f;
+				Interval = 0.05f;
 			}
 			else
 			{
 				PlayerSpeed = 100;
-				Interval = 0.2f;
+				Interval = 0.1f;
 			}
 
 			//Movement input
@@ -119,7 +114,7 @@ namespace DarkestGun
 			UpdateFrame(gameTime, PlayerSpriteColumnCount[(int)PlayerState]);
 		}
 
-		public void Draw(GameTime gameTime)
+		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
 			PrepareFrame(PlayerSprite[(int)PlayerState], PlayerSpriteColumnCount[(int)PlayerState]);
 
