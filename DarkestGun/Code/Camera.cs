@@ -19,14 +19,14 @@ namespace DarkestGun
         public void Update(Player target)
         {
             ZoomCheck();
-            var position = Matrix.CreateTranslation(
-              (int)(-target.PlayerPosition.X - (target.SourceRect.Width / 2)),
-              (int)(-target.PlayerPosition.Y - (target.SourceRect.Height / 2)),
+            Matrix position = Matrix.CreateTranslation(
+              (int)(-target.Position.X - (target.SourceRect.Width / 2)),
+              (int)(-target.Position.Y - (target.SourceRect.Height / 2)),
               0);
 
-            var zoom = Matrix.CreateScale(Zoom, Zoom, 1);
+            Matrix zoom = Matrix.CreateScale(Zoom, Zoom, 1);
 
-            var offset = Matrix.CreateTranslation(
+            Matrix offset = Matrix.CreateTranslation(
                 (int)(Main.ScreenDimension.Width / 2),
                 (int)(Main.ScreenDimension.Height / 2),
                 0);

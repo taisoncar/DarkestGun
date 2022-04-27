@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -8,22 +9,27 @@ namespace DarkestGun
 	
 	public class Player
     {
-		//Including other classes
-		private KeyboardState currentKBState;
+        #region Declarations
+
+        //Including other classes
+        private KeyboardState currentKBState;
 		private KeyboardState previousKBState;
+		private Level level;
 
 		//Player Variables
-		public Vector2 PlayerPosition;
-		public int PlayerSpeed = 100;					//Speed in pixels/s
-		public float Interval;						//Animation frames Interval in seconds
+		public Vector2 Position;
+		public int Speed = 100;		//Speed in pixels/s
+		public float Interval;				//Animation frames Interval in seconds
 		public bool FacingRight = true;
 		public Rectangle SourceRect;
 		public Rectangle DestinationRect;
-		Vector2 PlayerVelocity = new Vector2();
+		Vector2 Velocity = new Vector2();
+		private bool isOnGround;
+		private float previousBottom;
 
 		//Contents
-		private Texture2D[] PlayerSprite = new Texture2D[2];
-		private int[] PlayerSpriteColumnCount = new int[2];
+		private Texture2D[] sprite = new Texture2D[2];
+		private int[] columnCount = new int[2];
 
 		//Frame timing variables
 		private int currentFrame = 0;
@@ -37,16 +43,26 @@ namespace DarkestGun
 		}
 		public PlayerStates PlayerState;
 
+		public Rectangle BoundingRectangle
+		{
+			get
+			{
+				return new Rectangle((int)Position.X + 9, (int)Position.Y, 14, 32);
+			}
+		}
+
+		#endregion
 		public Player(Level level, Vector2 position) 
         {
-			PlayerPosition = position;
+			Position = position;
+			this.level = level;
 			
 			//Load player animation sprites
-			PlayerSprite[(int)PlayerStates.idle] = level.Content.Load<Texture2D>("PlayerIdle");
-			PlayerSpriteColumnCount[(int)PlayerStates.idle] = 11;
+			sprite[(int)PlayerStates.idle] = level.Content.Load<Texture2D>("Sprites/Player/PlayerIdle");
+			columnCount[(int)PlayerStates.idle] = 11;
 
-			PlayerSprite[(int)PlayerStates.walk] = level.Content.Load<Texture2D>("PlayerWalk");
-			PlayerSpriteColumnCount[(int)PlayerStates.walk] = 10;
+			sprite[(int)PlayerStates.walk] = level.Content.Load<Texture2D>("Sprites/Player/PlayerWalk");
+			columnCount[(int)PlayerStates.walk] = 10;
 		}
 
 		public void Update(GameTime gameTime)
@@ -56,7 +72,7 @@ namespace DarkestGun
 			previousKBState = currentKBState;
 			currentKBState = Keyboard.GetState();
 
-			PlayerVelocity = Vector2.Zero;
+			Velocity = Vector2.Zero;
 
 			//Idle check
 			if (!currentKBState.IsKeyDown(Keys.D) && !currentKBState.IsKeyDown(Keys.A) && !currentKBState.IsKeyDown(Keys.S) && !currentKBState.IsKeyDown(Keys.W))
@@ -65,14 +81,14 @@ namespace DarkestGun
 			}
 
 			//Sprint check
-			if (currentKBState.IsKeyDown(Keys.Space))
+			if (currentKBState.IsKeyDown(Keys.Q))
 			{
-				PlayerSpeed = 200;
+				Speed = 200;
 				Interval = 0.05f;
 			}
 			else
 			{
-				PlayerSpeed = 100;
+				Speed = 100;
 				Interval = 0.1f;
 			}
 
@@ -80,52 +96,54 @@ namespace DarkestGun
 			if (currentKBState.IsKeyDown(Keys.D))
 			{
 				PlayerState = PlayerStates.walk;
-				PlayerVelocity.X = PlayerSpeed;
+				Velocity.X = Speed;
 			}
 
 			if (currentKBState.IsKeyDown(Keys.A))
 			{
 				PlayerState = PlayerStates.walk;
-				PlayerVelocity.X = -PlayerSpeed;
+				Velocity.X = -Speed;
 			}
 
 			if (currentKBState.IsKeyDown(Keys.S))
             {
                 PlayerState = PlayerStates.walk;
-				PlayerVelocity.Y = PlayerSpeed;
+				Velocity.Y = Speed;
 			}
 
             if (currentKBState.IsKeyDown(Keys.W))
 			{
 				PlayerState = PlayerStates.walk;
-				PlayerVelocity.Y = -PlayerSpeed;
+				Velocity.Y = -Speed;
 			}
 
 			//Applying velocity
-			PlayerPosition += PlayerVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+			Position += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 			//Facing direction check
-			if (PlayerVelocity.X > 0)
+			if (Velocity.X > 0)
 				FacingRight = true;
-			else if (PlayerVelocity.X < 0)
+			else if (Velocity.X < 0)
 				FacingRight = false;
 
+			HandleCollisions();
+			
 			//Update frame
-			UpdateFrame(gameTime, PlayerSpriteColumnCount[(int)PlayerState]);
+			UpdateFrame(gameTime, columnCount[(int)PlayerState]);
 		}
 
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
-			PrepareFrame(PlayerSprite[(int)PlayerState], PlayerSpriteColumnCount[(int)PlayerState]);
+			PrepareFrame(sprite[(int)PlayerState], columnCount[(int)PlayerState]);
 
 			if (FacingRight)
 			{
-				spriteBatch.Draw(PlayerSprite[(int)PlayerState], DestinationRect, SourceRect, Color.White);
+				spriteBatch.Draw(sprite[(int)PlayerState], DestinationRect, SourceRect, Color.White);
 			}
 
             else
             {
-				spriteBatch.Draw(PlayerSprite[(int)PlayerState], DestinationRect, SourceRect, Color.White, 0, Vector2.Zero, SpriteEffects.FlipHorizontally,1);
+				spriteBatch.Draw(sprite[(int)PlayerState], DestinationRect, SourceRect, Color.White, 0, Vector2.Zero, SpriteEffects.FlipHorizontally,1);
 			}
 		}
 
@@ -135,7 +153,7 @@ namespace DarkestGun
 			int frameHeight = texture.Height;
 
 			SourceRect = new Rectangle(frameWidth * currentFrame, 0, frameWidth, frameHeight);
-			DestinationRect = new Rectangle((int)PlayerPosition.X, (int)PlayerPosition.Y, frameWidth, frameHeight);
+			DestinationRect = new Rectangle((int)Position.X, (int)Position.Y, frameWidth, frameHeight);
 		}
 
 		public void UpdateFrame(GameTime gameTime, int totalColumns)
@@ -158,6 +176,68 @@ namespace DarkestGun
 				}
 				timer = 0f;
 			}
+		}
+
+		private void HandleCollisions()
+		{
+			// Get the player's bounding rectangle and find neighboring tiles.
+			Rectangle bounds = BoundingRectangle;
+			int leftTile = (int)Math.Floor((float)bounds.Left / Tile.Width);
+			int rightTile = (int)Math.Ceiling(((float)bounds.Right / Tile.Width)) - 1;
+			int topTile = (int)Math.Floor((float)bounds.Top / Tile.Height);
+			int bottomTile = (int)Math.Ceiling(((float)bounds.Bottom / Tile.Height)) - 1;
+
+			// Reset flag to search for ground collision.
+			isOnGround = false;
+
+			// For each potentially colliding tile,
+			for (int y = topTile; y <= bottomTile; ++y)
+			{
+				for (int x = leftTile; x <= rightTile; ++x)
+				{
+					// If this tile is collidable,
+					TileCollision collision = level.GetCollision(x, y);
+					if (collision != TileCollision.Passable)
+					{
+						// Determine collision depth (with direction) and magnitude.
+						Rectangle tileBounds = level.GetBounds(x, y);
+						Vector2 depth = Collision.GetIntersectionDepth(bounds, tileBounds);
+						if (depth != Vector2.Zero)
+						{
+							float absDepthX = Math.Abs(depth.X);
+							float absDepthY = Math.Abs(depth.Y);
+							
+							if (absDepthY < absDepthX)
+							{
+								// If we crossed the top of a tile, we are on the ground.
+								if (previousBottom <= tileBounds.Top)
+									isOnGround = true;
+
+								// Ignore platforms, unless we are on the ground.
+								if (collision == TileCollision.Impassable || isOnGround)
+								{
+									// Resolve the collision along the Y axis.
+									Position = new Vector2(Position.X, Position.Y + depth.Y);
+
+									// Perform further collisions with the new bounds.
+									bounds = BoundingRectangle;
+								}
+							}
+							else if (collision == TileCollision.Impassable) // Ignore platforms.
+							{
+								// Resolve the collision along the X axis.
+								Position = new Vector2(Position.X + depth.X, Position.Y);
+
+								// Perform further collisions with the new bounds.
+								bounds = BoundingRectangle;
+							}
+						}
+					}
+				}
+			}
+
+			// Save the new bounds bottom.
+			previousBottom = bounds.Bottom;
 		}
 	}
 }

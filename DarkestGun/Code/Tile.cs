@@ -13,17 +13,17 @@ namespace DarkestGun
     public class Tile
     {
         public Texture2D Texture;
-        public TileCollision Collision;
+        public TileCollision TileCollision;
 
-        public const int Width = 16;
-        public const int Height = 16;
+        public const int Width = 32;
+        public const int Height = 32;
 
         public static readonly Vector2 Size = new Vector2(Width, Height);
 
-        public Tile(Texture2D texture, TileCollision collision)
+        public Tile(Texture2D texture, TileCollision tileCollision)
         {
             Texture = texture;
-            Collision = collision;
+            TileCollision = tileCollision;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace DarkestGun
 
         // Physical structure of the level.
         private Tile[,] tiles;
-        private Texture2D[] layers;
+        //private Texture2D[] layers;
         // The layer which entities are drawn on top of.
         private const int EntityLayer = 2;
 
@@ -24,10 +24,6 @@ namespace DarkestGun
 
         // Key locations in the level.        
         private Vector2 start;
-        private static readonly Point InvalidPosition = new Point(-1, -1);
-
-        // Level game state.
-        private Random random = new Random(354668); // Arbitrary, but constant seed
 
         // Level Content.        
         public ContentManager Content;
@@ -116,7 +112,8 @@ namespace DarkestGun
             if (Player != null)
                 throw new NotSupportedException("A level may only have one starting point.");
 
-            start = Collision.GetBottomCenter(GetBounds(x, y));
+            start.X = GetBounds(x, y).X;
+            start.Y = GetBounds(x, y).Y;
             Player = new Player(this, start);
 
             return new Tile(null, TileCollision.Passable);
@@ -144,7 +141,7 @@ namespace DarkestGun
             if (y < 0 || y >= Height)
                 return TileCollision.Passable;
 
-            return tiles[x, y].Collision;
+            return tiles[x, y].TileCollision;
         }
    
         public Rectangle GetBounds(int x, int y)

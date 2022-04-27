@@ -3,9 +3,6 @@ using Microsoft.Xna.Framework;
 
 namespace DarkestGun
 {
-    /// <summary>
-    /// A set of helpful methods for working with rectangles.
-    /// </summary>
     public static class Collision
     {
         /// <summary>
@@ -44,15 +41,6 @@ namespace DarkestGun
             float depthX = distanceX > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
             float depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
             return new Vector2(depthX, depthY);
-        }
-
-        /// <summary>
-        /// Gets the position of the center of the bottom edge of the rectangle.
-        /// </summary>
-        public static Vector2 GetBottomCenter(this Rectangle rect)
-        {
-            //return new Vector2(rect.X + rect.Width / 2.0f, rect.Bottom);
-            return new Vector2(rect.X, rect.Y);
         }
     }
 }

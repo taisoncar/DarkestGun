@@ -14,6 +14,7 @@ namespace DarkestGun
         private SpriteBatch spriteBatch;
         private Camera camera;
         private Level level;
+        private KeyboardState keyboardState;
 
         //Contents
         private Texture2D mall;
@@ -105,10 +106,13 @@ namespace DarkestGun
             //spriteBatch.DrawString(font, FrameRate.ToString("0"), new Vector2(30,30), Color.Black);
 
             //Draw player position as a string
-            /*spriteBatch.DrawString(font,
-                                    "(" + level.Player.PlayerPosition.X.ToString("0") + "," + level.Player.PlayerPosition.Y.ToString("0") + ")",
-                                   new Vector2(0, -50),
-                                    Color.Black);*/
+            Vector2 topLeft = level.Player.Position + new Vector2(10, 10);
+            topLeft.X -= ScreenDimension.Width / 2;
+            topLeft.Y -= ScreenDimension.Height / 2;
+            spriteBatch.DrawString(font,
+                                    "(" + level.Player.Position.X.ToString("0") + "," + level.Player.Position.Y.ToString("0") + ")",
+                                   topLeft,
+                                    Color.Black);
             //Player animation
             level.Draw(gameTime, spriteBatch);
 
