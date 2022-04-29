@@ -6,7 +6,7 @@ namespace DarkestGun
 {
     public class Camera
     {
-        public float Zoom { get; set; }
+        public float Zoom;
         private float currentMouseWheelValue, previousMouseWheelValue;
 
         public Matrix Transform { get; private set; }
@@ -20,15 +20,15 @@ namespace DarkestGun
         {
             ZoomCheck();
             Matrix position = Matrix.CreateTranslation(
-              (int)(-target.Position.X - (target.SourceRect.Width / 2)),
-              (int)(-target.Position.Y - (target.SourceRect.Height / 2)),
+              (int)(-target.Position.X - (32 / 2)),
+              (int)(-target.Position.Y - (32 / 2)),
               0);
 
             Matrix zoom = Matrix.CreateScale(Zoom, Zoom, 1);
 
             Matrix offset = Matrix.CreateTranslation(
-                (int)(Main.ScreenDimension.Width / 2),
-                (int)(Main.ScreenDimension.Height / 2),
+                (int)(Main.ScreenDimensions.Width / 2),
+                (int)(Main.ScreenDimensions.Height / 2),
                 0);
 
             Transform = position * zoom * offset;

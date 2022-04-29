@@ -163,21 +163,15 @@ namespace DarkestGun
 
         #region Update
 
-        public void Update(
-            GameTime gameTime,
-            KeyboardState keyboardState,
-            GamePadState gamePadState,
-            DisplayOrientation orientation)
+        public void Update(GameTime gameTime, KeyboardState keyboardState)
         {
-
+            Player.Update(gameTime, keyboardState);
         }
+
         #endregion
 
         #region Draw
 
-        /// <summary>
-        /// Draw everything in the level from background to foreground.
-        /// </summary>
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             //for (int i = 0; i <= EntityLayer; ++i)

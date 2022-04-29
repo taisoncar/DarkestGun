@@ -20,10 +20,10 @@ namespace DarkestGun
         private Texture2D mall;
         private Texture2D toilet;
         private SpriteFont font;
-
+        
         //Public Variables
         public float FrameRate = 0;
-        public static Rectangle ScreenDimension = new Rectangle();
+        public static Rectangle ScreenDimensions = new Rectangle();
 
         public Main()
         {
@@ -35,8 +35,8 @@ namespace DarkestGun
             graphics.PreferredBackBufferWidth = 1600; 
             graphics.PreferredBackBufferHeight = 900;
 
-            ScreenDimension.Width = graphics.PreferredBackBufferWidth;
-            ScreenDimension.Height = graphics.PreferredBackBufferHeight;
+            ScreenDimensions.Width = graphics.PreferredBackBufferWidth;
+            ScreenDimensions.Height = graphics.PreferredBackBufferHeight;
 
             graphics.ApplyChanges();
         }
@@ -53,9 +53,7 @@ namespace DarkestGun
             LoadNextLevel();
             camera = new Camera();
             
-            //Load sprites
-            mall = Content.Load<Texture2D>("mall");
-            toilet = Content.Load<Texture2D>("toilet");
+            //Load HUD
 
             //Load fonts
             font = Content.Load<SpriteFont>("rumpi");
@@ -63,12 +61,9 @@ namespace DarkestGun
 
         private void LoadNextLevel()
         {
-
-            // Unloads the content for the current level before loading the next one.
             if (level != null)
                 level.Dispose();
 
-            // Load the level.
             string levelPath = "Content/Levels/a.txt";
 
             using (Stream fileStream = TitleContainer.OpenStream(levelPath))
@@ -80,11 +75,20 @@ namespace DarkestGun
             //Framerate calculation
             FrameRate = 1 / (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            //Input polling
+            HandleInput(gameTime);
+
             //Update calls
-            level.Player.Update(gameTime);
+            level.Update(gameTime, keyboardState);
             camera.Update(level.Player);
 
             base.Update(gameTime);
+        }
+
+        private void HandleInput(GameTime gameTime)
+        {
+            //Movement inputs
+            keyboardState = Keyboard.GetState();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -99,25 +103,17 @@ namespace DarkestGun
                               null,
                               camera.Transform);
 
-            //Toilet background
-            //spriteBatch.Draw(toilet, new Rectangle(0, 0, 1600, 900), Color.White);
-
-            //FPS counter
-            //spriteBatch.DrawString(font, FrameRate.ToString("0"), new Vector2(30,30), Color.Black);
-
             //Draw player position as a string
             Vector2 topLeft = level.Player.Position + new Vector2(10, 10);
-            topLeft.X -= ScreenDimension.Width / 2;
-            topLeft.Y -= ScreenDimension.Height / 2;
+            topLeft.X -= ScreenDimensions.Width / 2;
+            topLeft.Y -= ScreenDimensions.Height / 2;
             spriteBatch.DrawString(font,
                                     "(" + level.Player.Position.X.ToString("0") + "," + level.Player.Position.Y.ToString("0") + ")",
                                    topLeft,
                                     Color.Black);
-            //Player animation
+            
+            //Draw level
             level.Draw(gameTime, spriteBatch);
-
-            //Toilet
-            //spriteBatch.Draw(toilet, new Vector2(450, 240), Color.White);
 
             spriteBatch.End();
 
