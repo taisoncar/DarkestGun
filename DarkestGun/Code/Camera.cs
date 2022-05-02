@@ -54,12 +54,12 @@ namespace DarkestGun
 
             if (currentMouseWheelValue > previousMouseWheelValue)
             {
-                AdjustZoom(.1f);
+                AdjustZoom(.2f);
             }
 
             if (currentMouseWheelValue < previousMouseWheelValue)
             {
-                AdjustZoom(-.1f);
+                AdjustZoom(-.2f);
             }
         }
     }

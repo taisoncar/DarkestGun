@@ -12,42 +12,42 @@ namespace DarkestGun
         #region Declarations
 
         //Including other classes
-        private KeyboardState currentKBState;
-		private KeyboardState previousKBState;
 		private Level level;
 
 		//Player Variables
 		public Vector2 Position;
 		public int Speed = 100;				//Speed in pixels/s
-		public float Interval;				//Animation frames Interval in seconds
-		public bool FacingRight = true;
 		private SpriteEffects flip = SpriteEffects.None;
-		public Rectangle SourceRect;
-		public Rectangle DestinationRect;
-		Vector2 Velocity = new Vector2();
-		private bool isOnGround;
+		private Vector2 velocity = new Vector2();
+		public bool IsOnGround;
 		private float previousBottom;
 
 		//Animations
-		private Animation idleAnimation, walkAnimation;
+		private AnimationSprite idleAnimation, walkAnimation, jumpAnimation;
+		private Animation animation;
 
-		//Frame timing variables
-		private int currentFrame = 0;
-		private int totalFrames;
-		private float timer = 0;
+		private const float MaxJumpTime = 0.5f;
+		private const float JumpLaunchVelocity = -3600.0f;
+		private const float GravityAcceleration = 3000.0f;
+		private const float MaxFallSpeed = 550.0f;
+		private const float JumpControlPower = 0.14f;
+		 
+		private bool isJumping = false;
+		private bool wasJumping = false;
+		private float jumpTime = 0f;
 
-		/*public enum PlayerStates
-		{
-			idle,
-			walk
-		}
-		public static PlayerStates PlayerState;*/
-
+		private Rectangle localBounds;
 		public Rectangle BoundingRectangle
 		{
 			get
 			{
-				return new Rectangle((int)Position.X + 9 , (int)Position.Y, 14, 32);
+				//return new Rectangle((int)Position.X + 9, (int)Position.Y, 14, 32);
+				return new Rectangle((int)Position.X, (int)Position.Y, 32, 32);
+
+				/*int left = (int)Math.Round(Position.X) + localBounds.X;
+				int top = (int)Math.Round(Position.Y) + localBounds.Y;
+
+				return new Rectangle(left, top, localBounds.Width, localBounds.Height);*/
 			}
 		}
 
@@ -58,82 +58,89 @@ namespace DarkestGun
 			this.level = level;
 			
 			//Load animations
-			idleAnimation = new Animation(level.Content.Load<Texture2D>("Sprites/Player/PlayerIdle"), 0.1f, true);
-			walkAnimation = new Animation(level.Content.Load<Texture2D>("Sprites/Player/PlayerWalk"), 0.1f, true);
+			idleAnimation = new AnimationSprite(level.Content.Load<Texture2D>("Sprites/Player/PlayerIdle"), 0.1f, true);
+			walkAnimation = new AnimationSprite(level.Content.Load<Texture2D>("Sprites/Player/PlayerWalk"), 0.1f, true);
+			jumpAnimation = new AnimationSprite(level.Content.Load<Texture2D>("Sprites/Player/PlayerJump"), 0.05f, false);
+
+			int width = (int)(idleAnimation.FrameWidth * 0.4);
+			int left = (idleAnimation.FrameWidth - width) / 2;
+			int height = (int)(idleAnimation.FrameHeight);
+			int top = idleAnimation.FrameHeight - height;
+			localBounds = new Rectangle(left, top, width, height);
+
+			animation = new Animation();
 		}
 
 		public void Update(GameTime gameTime, KeyboardState keyboardState)
 		{
-			
-			//Movement inputs
-			previousKBState = currentKBState;
-			currentKBState = keyboardState;
 
-			Velocity = Vector2.Zero;
+			velocity.X = 0f;
 
 			//Idle check
-			if (!currentKBState.IsKeyDown(Keys.D) && !currentKBState.IsKeyDown(Keys.A) && !currentKBState.IsKeyDown(Keys.S) && !currentKBState.IsKeyDown(Keys.W))
+			if (!keyboardState.IsKeyDown(Keys.D) && !keyboardState.IsKeyDown(Keys.A) && !keyboardState.IsKeyDown(Keys.S) && !keyboardState.IsKeyDown(Keys.W))
 			{
-				idleAnimation.PlayAnimation();
+				animation.PlayAnimation(idleAnimation);
 			}
 
 			//Sprint check
-			if (currentKBState.IsKeyDown(Keys.Q))
+			if (keyboardState.IsKeyDown(Keys.Q))
 			{
 				Speed = 200;
-				Interval = 0.05f;
+				walkAnimation.Interval = 0.07f;
 			}
 			else
 			{
 				Speed = 100;
-				Interval = 0.1f;
+				walkAnimation.Interval = 0.1f;
 			}
 
 			//Movement input
-			if (currentKBState.IsKeyDown(Keys.D))
+			if (keyboardState.IsKeyDown(Keys.D) && keyboardState.IsKeyDown(Keys.A))
 			{
-				walkAnimation.PlayAnimation();
-				Velocity.X = Speed;
+				velocity.X = 0f;
 			}
-
-			else if (currentKBState.IsKeyDown(Keys.A))
+			else if (keyboardState.IsKeyDown(Keys.D))
 			{
-				walkAnimation.PlayAnimation();
-				Velocity.X = -Speed;
+				velocity.X = Speed;
 			}
-
-			if (currentKBState.IsKeyDown(Keys.S))
-            {
-				walkAnimation.PlayAnimation();
-				Velocity.Y = Speed;
-			}
-
-            else if (currentKBState.IsKeyDown(Keys.W))
+			else if (keyboardState.IsKeyDown(Keys.A))
 			{
-				walkAnimation.PlayAnimation();
-				Velocity.Y = -Speed;
+				velocity.X = -Speed;
 			}
+			if (keyboardState.IsKeyDown(Keys.W))
+			{
+				isJumping = true;
+			}
+				
 
 			//Applying velocity
-			Position += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+			ApplyPhysics(gameTime);
 
-			//Facing direction check
-			if (Velocity.X < 0)
-				flip = SpriteEffects.FlipHorizontally;
-			else if (Velocity.X > 0)
-				flip = SpriteEffects.None;
+			if (IsOnGround)
+			{
+				if (Math.Abs(velocity.X) - 0.02f > 0)
+				{
+					animation.PlayAnimation(walkAnimation);
+				}
+				else
+				{
+					animation.PlayAnimation(idleAnimation);
+				}
+			}
 
-			HandleCollisions();
+			isJumping = false;
 		}
 
 		public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
-			if (Velocity.X < 0) 
-				walkAnimation.Draw(gameTime, spriteBatch, Position, flip);
-			else if (Velocity.X > 0)
-				walkAnimation.Draw(gameTime, spriteBatch, Position, flip);
-			else
-				idleAnimation.Draw(gameTime, spriteBatch, Position, flip);
+			//Facing direction check
+			if (velocity.X < 0)
+				flip = SpriteEffects.FlipHorizontally;
+			else if (velocity.X > 0)
+				flip = SpriteEffects.None;
+
+			RectangleExtension.DrawRectangle(spriteBatch, BoundingRectangle, Color.Red, 1);
+			animation.Draw(gameTime, spriteBatch, Position, flip);
 		}
 
 		private void HandleCollisions()
@@ -146,7 +153,7 @@ namespace DarkestGun
 			int bottomTile = (int)Math.Ceiling(((float)bounds.Bottom / Tile.Height)) - 1;
 
 			// Reset flag to search for ground collision.
-			isOnGround = false;
+			IsOnGround = false;
 
 			// For each potentially colliding tile,
 			for (int y = topTile; y <= bottomTile; ++y)
@@ -169,7 +176,7 @@ namespace DarkestGun
 							{
 								// If we crossed the top of a tile, we are on the ground.
 								if (previousBottom <= tileBounds.Top)
-									isOnGround = true;
+									IsOnGround = true;
 
 									// Resolve the collision along the Y axis.
 									Position = new Vector2(Position.X, Position.Y + depth.Y);
@@ -192,6 +199,70 @@ namespace DarkestGun
 
 			// Save the new bounds bottom.
 			previousBottom = bounds.Bottom;
+		}
+
+		public void ApplyPhysics(GameTime gameTime)
+		{
+			float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+			Vector2 previousPosition = Position;
+
+			// Base velocity is a combination of horizontal movement control and
+			// acceleration downward due to gravity.
+			velocity.Y = MathHelper.Clamp(velocity.Y + 
+				GravityAcceleration 
+				* elapsed, -MaxFallSpeed, MaxFallSpeed);
+
+			velocity.Y = DoJump(velocity.Y, gameTime);
+
+			// Apply velocity.
+			Position += velocity * elapsed;
+			Position = new Vector2((float)Math.Round(Position.X), (float)Math.Round(Position.Y));
+
+			// If the player is now colliding with the level, separate them.
+			HandleCollisions();
+
+			// If the collision stopped us from moving, reset the velocity to zero.
+
+			if (Position.X == previousPosition.X)
+				velocity.X = 0;
+
+			if (Position.Y == previousPosition.Y)
+				velocity.Y = 0;
+		}
+
+		
+		private float DoJump(float velocityY, GameTime gameTime)
+		{
+			// If the player wants to jump
+			if (isJumping)
+			{
+				// Begin or continue a jump
+				if ((!wasJumping && IsOnGround) || jumpTime > 0.0f)
+				{
+					jumpTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+					animation.PlayAnimation(jumpAnimation);
+				}
+
+				// If we are in the ascent of the jump
+				if (0.0f < jumpTime && jumpTime <= MaxJumpTime)
+				{
+					// Fully override the vertical velocity with a power curve that gives players more control over the top of the jump
+					velocityY = JumpLaunchVelocity * (1.0f - (float)Math.Pow(jumpTime / MaxJumpTime, JumpControlPower));
+				}
+				else
+				{
+					// Reached the apex of the jump
+					jumpTime = 0.0f;
+				}
+			}
+			else
+			{
+				jumpTime = 0.0f;
+			}
+			wasJumping = isJumping;
+
+			return velocityY;
 		}
 	}
 }

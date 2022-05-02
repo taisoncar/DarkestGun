@@ -64,7 +64,7 @@ namespace DarkestGun
             if (level != null)
                 level.Dispose();
 
-            string levelPath = "Content/Levels/a.txt";
+            string levelPath = "Content/Levels/Toilet.txt";
 
             using (Stream fileStream = TitleContainer.OpenStream(levelPath))
                 level = new Level(Content, fileStream);

@@ -6,57 +6,44 @@ namespace DarkestGun
 {
     public class Animation
     {
-        public Texture2D Texture;
-        public float Interval;
-        public bool IsLooping;
-        public bool IsPlaying;
-        public int FrameWidth, FrameHeight, FrameCount, FrameIndex;
-        public float PlayingTime;
+        private int frameIndex;
+        private float PlayingTime;
+        private AnimationSprite animationSprite;
 
-        public Animation(Texture2D texture, float interval, bool isLooping)
+        public void PlayAnimation(AnimationSprite animationSprite)
         {
-            Texture = texture;
-            Interval = interval;
-            IsLooping = isLooping;
-            IsPlaying = false;
-            FrameWidth = Texture.Height;
-            FrameHeight = Texture.Height;
-            FrameCount = Texture.Width / FrameWidth;
-        }
-
-        public void PlayAnimation()
-        {
-            if (IsPlaying)
+            if (this.animationSprite == animationSprite)
                 return;
 
-            FrameIndex = 0;
+            this.animationSprite = animationSprite;
+            frameIndex = 0;
             PlayingTime = 0.0f;
-            IsPlaying = true;
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Vector2 position, SpriteEffects spriteEffects)
         {
-            if (!IsPlaying)
+            if (animationSprite == null)
                 throw new NotSupportedException("No animation is currently playing.");
 
             PlayingTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            while (PlayingTime > Interval)
+            while (PlayingTime > animationSprite.Interval)
             {
-                PlayingTime = 0.0f;
+                PlayingTime -= animationSprite.Interval;
 
-                if (IsLooping)
+                if (animationSprite.IsLooping)
                 {
-                    FrameIndex = (FrameIndex + 1) % FrameCount;
+                    frameIndex = (frameIndex + 1) % animationSprite.FrameCount;
                 }
                 else
                 {
-                    FrameIndex = Math.Min(FrameIndex + 1, FrameCount - 1);
+                    frameIndex = Math.Min(frameIndex + 1, animationSprite.FrameCount - 1);
                 }
             }
 
-            Rectangle source = new Rectangle(FrameIndex * FrameWidth, 0, FrameWidth, FrameHeight);
-            Rectangle destination = new Rectangle((int)position.X, (int)position.Y, FrameWidth, FrameHeight);
-            spriteBatch.Draw(Texture, destination, source, Color.White, 0.0f, Vector2.Zero, spriteEffects, 0.0f);
+            Rectangle source = new Rectangle(frameIndex * animationSprite.FrameWidth, 0, animationSprite.FrameWidth, animationSprite.FrameHeight);
+            Rectangle destination = new Rectangle((int)position.X, (int)position.Y, animationSprite.FrameWidth, animationSprite.FrameHeight);
+
+            spriteBatch.Draw(animationSprite.Texture, destination, source, Color.White, 0.0f, Vector2.Zero, spriteEffects, 0.0f);
         }
     }
 }

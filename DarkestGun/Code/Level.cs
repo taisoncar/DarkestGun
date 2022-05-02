@@ -79,15 +79,34 @@ namespace DarkestGun
             {
                 // Blank space
                 case '0':
-                    return new Tile(null, TileCollision.Passable);
+                    return LoadTileContent("0", new Rectangle(0, 0, Tile.Width, Tile.Height), TileCollision.Passable);
 
-                // Impassable block
+                // Impassable blocks
                 case '1':
-                    return LoadTileContent("Impassable", TileCollision.Impassable);
+                    return LoadTileContent("ToiletAtlas", new Rectangle(1 * Tile.Width, 2 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '2':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(1 * Tile.Width, 1 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '3':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(0 * Tile.Width, 1 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '4':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(2 * Tile.Width, 1 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '5':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(1 * Tile.Width, 0 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '6':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(0 * Tile.Width, 0 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '7':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(2 * Tile.Width, 0 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '8':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(0 * Tile.Width, 2 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
+                case '9':
+                    return LoadTileContent("ToiletAtlas", new Rectangle(2 * Tile.Width, 2 * Tile.Height, Tile.Width, Tile.Height), TileCollision.Impassable);
 
                 // Passable block
-                case '=':
-                    return LoadTileContent("Passable", TileCollision.Passable);
+                case 'a':
+                    return LoadTileContent("a", new Rectangle(0, 0, Tile.Width, Tile.Height), TileCollision.Passable);
+
+                case 'b':
+                    return LoadTileContent("b", new Rectangle(0, 0, Tile.Width, Tile.Height), TileCollision.Passable);
 
                 // Player 1 start point
                 case 'P':
@@ -99,14 +118,11 @@ namespace DarkestGun
             }
         }
 
-        private Tile LoadTileContent(string name, TileCollision collision)
+        private Tile LoadTileContent(string name, Rectangle source, TileCollision collision)
         {
-            return new Tile(Content.Load<Texture2D>("Tiles/" + name), collision);
+            return new Tile(Content.Load<Texture2D>("Tiles/" + name), source, collision);
         }
 
-        /// <summary>
-        /// Instantiates a player, puts him in the level, and remembers where to put him when he is resurrected.
-        /// </summary>
         private Tile LoadStartTile(int x, int y)
         {
             if (Player != null)
@@ -116,7 +132,7 @@ namespace DarkestGun
             start.Y = GetBounds(x, y).Y;
             Player = new Player(this, start);
 
-            return new Tile(null, TileCollision.Passable);
+            return new Tile(null, new Rectangle(0, 0, Tile.Width, Tile.Height), TileCollision.Passable);
         }
 
         /// <summary>
@@ -201,7 +217,8 @@ namespace DarkestGun
                     {
                         // Draw it in screen space.
                         Vector2 position = new Vector2(x, y) * Tile.Size;
-                        spriteBatch.Draw(texture, position, Color.White);
+                        RectangleExtension.DrawRectangle(spriteBatch, GetBounds(x, y), Color.Green, 1);
+                        spriteBatch.Draw(texture, position, tiles[x, y].Source, Color.White);
                     }
                 }
             }
