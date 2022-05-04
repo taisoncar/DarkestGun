@@ -12,13 +12,15 @@ namespace DarkestGun
         //Including other classes
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private Camera camera;
+        public static Camera camera;
         private Level level;
         private KeyboardState keyboardState;
+        private MouseState mouseState;
+        private AccelerometerState accelerometerState;
 
         //Contents
-        private Texture2D mall;
-        private Texture2D toilet;
+        //private Texture2D mall;
+        //private Texture2D toilet;
         private SpriteFont font;
         
         //Public Variables
@@ -39,11 +41,7 @@ namespace DarkestGun
             ScreenDimensions.Height = graphics.PreferredBackBufferHeight;
 
             graphics.ApplyChanges();
-        }
-
-        protected override void Initialize()
-        {
-            base.Initialize();
+            Accelerometer.Initialize();
         }
 
         protected override void LoadContent()
@@ -79,7 +77,7 @@ namespace DarkestGun
             HandleInput(gameTime);
 
             //Update calls
-            level.Update(gameTime, keyboardState);
+            level.Update(gameTime, keyboardState, mouseState, accelerometerState);
             camera.Update(level.Player);
 
             base.Update(gameTime);
@@ -89,6 +87,8 @@ namespace DarkestGun
         {
             //Movement inputs
             keyboardState = Keyboard.GetState();
+            accelerometerState = Accelerometer.GetState();
+            mouseState = Mouse.GetState();
         }
 
         protected override void Draw(GameTime gameTime)

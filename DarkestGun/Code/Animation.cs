@@ -9,6 +9,11 @@ namespace DarkestGun
         private int frameIndex;
         private float PlayingTime;
         private AnimationSprite animationSprite;
+        public Vector2 Origin
+        {
+            get { return new Vector2(animationSprite.FrameWidth, animationSprite.FrameHeight); }
+        }
+
 
         public void PlayAnimation(AnimationSprite animationSprite)
         {

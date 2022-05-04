@@ -37,9 +37,9 @@ namespace DarkestGun
         public void AdjustZoom(float ZoomAmount)
         {
             Zoom += ZoomAmount;
-            if (Zoom < .35f)
+            if (Zoom < .8f)
             {
-                Zoom = .35f;
+                Zoom = .8f;
             }
             if (Zoom > 5f)
             {

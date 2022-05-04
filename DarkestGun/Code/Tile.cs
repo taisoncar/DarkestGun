@@ -8,6 +8,7 @@ namespace DarkestGun
     {
         Passable,
         Impassable,
+        Platform,
     }
 
     public class Tile

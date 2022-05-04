@@ -28,6 +28,9 @@ namespace DarkestGun
         // Level Content.        
         public ContentManager Content;
 
+        public List<Bullet> bullet = new List<Bullet>();
+        public Texture2D bulletSprite;
+
         #endregion
 
         #region Loading
@@ -37,6 +40,7 @@ namespace DarkestGun
             // Create a new Content manager to load Content used just by this level.
             Content = content;
 
+            bulletSprite = Content.Load<Texture2D>("Bullet");
             LoadTiles(fileStream);
         }
 
@@ -79,7 +83,8 @@ namespace DarkestGun
             {
                 // Blank space
                 case '0':
-                    return LoadTileContent("0", new Rectangle(0, 0, Tile.Width, Tile.Height), TileCollision.Passable);
+                    return new Tile(null, new Rectangle(0, 0, Tile.Width, Tile.Height), TileCollision.Passable);
+                    //return LoadTileContent("0", new Rectangle(0, 0, Tile.Width, Tile.Height), TileCollision.Passable);
 
                 // Impassable blocks
                 case '1':
@@ -179,9 +184,13 @@ namespace DarkestGun
 
         #region Update
 
-        public void Update(GameTime gameTime, KeyboardState keyboardState)
+        public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, AccelerometerState accelerometerState)
         {
-            Player.Update(gameTime, keyboardState);
+            Player.Update(gameTime, keyboardState, mouseState, accelerometerState);
+            foreach (Bullet bullet in bullet)
+            {
+                bullet.Update(gameTime);
+            }
         }
 
         #endregion
@@ -196,6 +205,11 @@ namespace DarkestGun
             DrawTiles(spriteBatch);
 
             Player.Draw(gameTime, spriteBatch);
+
+            foreach (Bullet bullet in bullet)
+            {
+                bullet.Draw(spriteBatch);
+            }
 
             //for (int i = EntityLayer + 1; i < layers.Length; ++i)
             //    spriteBatch.Draw(layers[i], Vector2.Zero, Color.White);
@@ -217,7 +231,7 @@ namespace DarkestGun
                     {
                         // Draw it in screen space.
                         Vector2 position = new Vector2(x, y) * Tile.Size;
-                        RectangleExtension.DrawRectangle(spriteBatch, GetBounds(x, y), Color.Green, 1);
+                        //RectangleExtension.DrawRectangle(spriteBatch, GetBounds(x, y), Color.White, 1);
                         spriteBatch.Draw(texture, position, tiles[x, y].Source, Color.White);
                     }
                 }
